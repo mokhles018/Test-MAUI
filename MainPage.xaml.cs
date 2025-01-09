@@ -1,12 +1,6 @@
-﻿//using System.Net.Http;
-//using System.Xml;
-//using System.Threading.Tasks;
-//using Newtonsoft.Json; // Install Newtonsoft.Json package if needed
-
-using System;
+﻿using Newtonsoft.Json;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text;
 
 namespace MauiApp1
 {
@@ -50,6 +44,50 @@ namespace MauiApp1
             catch (Exception ex)
             {
                 return $"Error: {ex.Message}";
+            }
+        }
+
+        private async void OnGetUsersClicked(object sender, EventArgs e)
+        {
+            var users = await GetUsersAsync();
+            UsersLabel.Text = users;  // Display the fetched users in the label
+            Console.WriteLine(users);  // Optionally log the users to the console
+        }
+
+        // Add new user function
+        private async void OnAddUserClicked(object sender, EventArgs e)
+        {
+
+            // Create a user object
+            var newUser = new
+            {
+                name = "Resul",
+                email = "resul.xponent@gmail.com",
+                phone = "01118886677"
+            };
+
+            // Serialize the user object to JSON
+            var jsonContent = JsonConvert.SerializeObject(newUser);
+
+            // Send the POST request
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    "http://localhost:3000/users", 
+                    new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                );
+
+                response.EnsureSuccessStatusCode(); // Ensure the response is successful
+                var result = await response.Content.ReadAsStringAsync();
+
+                // Optionally handle the response
+                Console.WriteLine("User added successfully: " + result);
+                await DisplayAlert("Success", "User added successfully", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding user: {ex.Message}");
+                await DisplayAlert("Error", "Failed to add user", "OK");
             }
         }
     }
